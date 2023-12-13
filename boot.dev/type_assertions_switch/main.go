@@ -17,16 +17,16 @@ func getExpenseReport(e expense) (string, float64) {
 
 func (e email) cost() float64 {
 	if !e.isSubscribed {
-		return float64(len(e.body)) * .05
+		return float64(len(e.body)) * .000005
 	}
-	return float64(len(e.body)) * .01
+	return float64(len(e.body)) * .000001
 }
 
 func (s sms) cost() float64 {
 	if !s.isSubscribed {
-		return float64(len(s.body)) * .1
+		return float64(len(s.body)) * .000001
 	}
-	return float64(len(s.body)) * .03
+	return float64(len(s.body)) * .000003
 }
 
 func (i invalid) cost() float64 {
@@ -52,17 +52,24 @@ type sms struct {
 type invalid struct{}
 
 func estimateYearlyCost(e expense, averageMessagesPerYear int) float64 {
-	return e.cost() * float64(averageMessagesPerYear)
+	switch e := e.(type) {
+	case email:
+		return e.cost() * float64(averageMessagesPerYear)
+	case sms:
+		return e.cost() * float64(averageMessagesPerYear)
+	default:
+		return 0.0
+	}
 }
 
-func test(e expense) {
-	address, cost := getExpenseReport(e)
+func test(e expense, averageMessagesPerYear int) {
+	address, _ := getExpenseReport(e)
 	switch e.(type) {
 	case email:
-		fmt.Printf("Report: The email going to %s will cost: %.2f\n", address, cost)
+		fmt.Printf("Report: The email going to %s will cost: %.2f\n", address, estimateYearlyCost(e, averageMessagesPerYear))
 		fmt.Println("====================================")
 	case sms:
-		fmt.Printf("Report: The sms going to %s will cost: %.2f\n", address, cost)
+		fmt.Printf("Report: The sms going to %s will cost: %.2f\n", address, estimateYearlyCost(e, averageMessagesPerYear))
 		fmt.Println("====================================")
 	default:
 		fmt.Println("Report: Invalid expense")
@@ -71,30 +78,31 @@ func test(e expense) {
 }
 
 func main() {
+	averageMessagesPerYear := 1000
 	test(email{
 		isSubscribed: true,
 		body:         "hello there",
 		toAddress:    "john@does.com",
-	})
+	}, averageMessagesPerYear)
 	test(email{
 		isSubscribed: false,
 		body:         "This meeting could have been an email",
 		toAddress:    "jane@doe.com",
-	})
+	}, averageMessagesPerYear)
 	test(email{
 		isSubscribed: false,
 		body:         "This meeting could have been an email",
 		toAddress:    "elon@doe.com",
-	})
+	}, averageMessagesPerYear)
 	test(sms{
 		isSubscribed:  false,
 		body:          "This meeting could have been an email",
 		toPhoneNumber: "+155555509832",
-	})
+	}, averageMessagesPerYear)
 	test(sms{
 		isSubscribed:  false,
 		body:          "This meeting could have been an email",
 		toPhoneNumber: "+155555504444",
-	})
-	test(invalid{})
+	}, averageMessagesPerYear)
+	test(invalid{}, 0)
 }
