@@ -12,8 +12,6 @@ type user struct {
 	number int
 }
 
-// don't edit below this line
-
 func test(s sender) {
 	fmt.Println("Sender name:", s.name)
 	fmt.Println("Sender number:", s.number)

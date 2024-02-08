@@ -4,6 +4,15 @@ import (
 	"fmt"
 )
 
+func sendSMS(message string) (float64, error) {
+	const maxTextLen = 25
+	const costPerChar = .0002
+	if len(message) > maxTextLen {
+		return 0.0, fmt.Errorf("can't send texts over %v characters", maxTextLen)
+	}
+	return costPerChar * float64(len(message)), nil
+}
+
 func sendSMSToCouple(msgToCustomer, msgToSpouse string) (float64, error) {
 	costToCustomer, err := sendSMS(msgToCustomer)
 	if err != nil {
@@ -14,15 +23,6 @@ func sendSMSToCouple(msgToCustomer, msgToSpouse string) (float64, error) {
 		return 0.0, err
 	}
 	return costToCustomer + costToSpouse, nil
-}
-
-func sendSMS(message string) (float64, error) {
-	const maxTextLen = 25
-	const costPerChar = .0002
-	if len(message) > maxTextLen {
-		return 0.0, fmt.Errorf("can't send texts over %v characters", maxTextLen)
-	}
-	return costPerChar * float64(len(message)), nil
 }
 
 func test(msgToCustomer, msgToSpouse string) {
