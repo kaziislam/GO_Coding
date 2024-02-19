@@ -33,7 +33,7 @@ func (sr sendingReport) getMessage() string {
 
 func test(m message) {
 	sendMessage(m)
-	fmt.Println("====================================\n")
+	fmt.Println("====================================")
 }
 
 func main() {
